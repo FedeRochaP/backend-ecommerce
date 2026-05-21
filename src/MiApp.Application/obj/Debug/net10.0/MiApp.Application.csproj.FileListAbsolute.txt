@@ -1,0 +1,15 @@
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\bin\Debug\net10.0\MiApp.Application.deps.json
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\bin\Debug\net10.0\MiApp.Application.dll
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\bin\Debug\net10.0\MiApp.Application.pdb
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\bin\Debug\net10.0\MiApp.Domain.dll
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\bin\Debug\net10.0\MiApp.Domain.pdb
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\obj\Debug\net10.0\MiApp.Application.csproj.AssemblyReference.cache
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\obj\Debug\net10.0\MiApp.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\obj\Debug\net10.0\MiApp.Application.AssemblyInfoInputs.cache
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\obj\Debug\net10.0\MiApp.Application.AssemblyInfo.cs
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\obj\Debug\net10.0\MiApp.Application.csproj.CoreCompileInputs.cache
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\obj\Debug\net10.0\MiApp.Ap.4971B6B6.Up2Date
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\obj\Debug\net10.0\MiApp.Application.dll
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\obj\Debug\net10.0\refint\MiApp.Application.dll
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\obj\Debug\net10.0\MiApp.Application.pdb
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Application\obj\Debug\net10.0\ref\MiApp.Application.dll
