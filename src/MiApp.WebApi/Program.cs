@@ -47,6 +47,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // Use cases
 builder.Services.AddScoped<LoginUseCase>();
 builder.Services.AddScoped<RegisterUseCase>();
+builder.Services.AddScoped<GetAllProductsUseCase>();
+builder.Services.AddScoped<CreateOrderUseCase>();
 
 // JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"]!;

@@ -1,4 +1,5 @@
 using MiApp.Application.Interfaces;
+using MiApp.Application.UseCases;
 using MiApp.Domain.Entities;
 using MiApp.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -10,17 +11,20 @@ namespace MiApp.WebApi.Controllers;
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
+    private readonly GetAllProductsUseCase _getAllProductsUseCase;
     private readonly IProductRepository _productRepository;
 
-    public ProductsController(IProductRepository productRepository)
+    public ProductsController(GetAllProductsUseCase getAllProductsUseCase, IProductRepository productRepository)
     {
+        _getAllProductsUseCase = getAllProductsUseCase;
         _productRepository = productRepository;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {
-        var products = await _productRepository.GetAllAsync(ct);
+        // QUERY: pasa por el caso de uso
+        var products = await _getAllProductsUseCase.ExecuteAsync(ct);
         return Ok(products);
     }
 

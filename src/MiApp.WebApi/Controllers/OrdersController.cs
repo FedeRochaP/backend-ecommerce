@@ -1,5 +1,6 @@
+using MiApp.Application.DTOs;
 using MiApp.Application.Interfaces;
-using MiApp.Domain.Entities;
+using MiApp.Application.UseCases;
 using MiApp.Domain.Exceptions;
 using MiApp.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -12,13 +13,13 @@ namespace MiApp.WebApi.Controllers;
 [Authorize]
 public class OrdersController : ControllerBase
 {
+    private readonly CreateOrderUseCase _createOrderUseCase;
     private readonly IOrderRepository _orderRepository;
-    private readonly IProductRepository _productRepository;
 
-    public OrdersController(IOrderRepository orderRepository, IProductRepository productRepository)
+    public OrdersController(CreateOrderUseCase createOrderUseCase, IOrderRepository orderRepository)
     {
+        _createOrderUseCase = createOrderUseCase;
         _orderRepository = orderRepository;
-        _productRepository = productRepository;
     }
 
     [HttpGet("{id:guid}")]
@@ -39,20 +40,18 @@ public class OrdersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateOrderRequest request, CancellationToken ct)
     {
+        // Mapeo del modelo HTTP al command de Application
+        var command = new CreateOrderCommand(
+            request.UserId,
+            request.Items.Select(i => new OrderItemCommand(i.ProductId, i.Quantity)).ToList());
+
         try
         {
-            var order = new Order(Guid.NewGuid(), request.UserId);
+            // COMMAND: pasa por el caso de uso
+            var order = await _createOrderUseCase.ExecuteAsync(command, ct);
+            if (order is null)
+                return NotFound(new { message = "Uno o más productos no fueron encontrados." });
 
-            foreach (var item in request.Items)
-            {
-                var product = await _productRepository.GetByIdAsync(item.ProductId, ct);
-                if (product is null)
-                    return NotFound(new { message = $"Producto '{item.ProductId}' no encontrado." });
-
-                order.AddItem(product, item.Quantity);
-            }
-
-            await _orderRepository.AddAsync(order, ct);
             return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
         }
         catch (DomainException ex)

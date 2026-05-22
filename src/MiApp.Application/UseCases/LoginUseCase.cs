@@ -27,6 +27,6 @@ public class LoginUseCase
         if (!_passwordHasher.Verify(request.Password, user.PasswordHash)) return null;
 
         var token = _tokenService.GenerateToken(user);
-        return new LoginResponse(token);
+        return new LoginResponse(user.Id, token);
     }
 }

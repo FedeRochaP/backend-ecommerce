@@ -41,20 +41,20 @@ src/
 │   ├── Interfaces/       # IRepository<T> (base genérica)
 │   └── ValueObjects/     # Money
 ├── MiApp.Application/
-│   ├── DTOs/             # LoginRequest, LoginResponse, RegisterRequest
-│   ├── Interfaces/       # IProductRepository, IOrderRepository, IUserRepository, ITokenService, IPasswordHasher
-│   └── UseCases/         # LoginUseCase, RegisterUseCase
+│   ├── DTOs/             # LoginRequest, LoginResponse, RegisterRequest, CreateOrderCommand
+│   ├── Interfaces/       # IProductRepository, IOrderRepository, IUserRepository, ICategoryRepository, ITokenService, IPasswordHasher
+│   └── UseCases/         # LoginUseCase, RegisterUseCase, GetAllProductsUseCase, CreateOrderUseCase
 ├── MiApp.Infrastructure/
 │   ├── Migrations/
 │   ├── Persistence/
 │   │   ├── ApplicationDbContext.cs
 │   │   └── Configurations/   # Fluent API para cada entidad
-│   ├── Repositories/         # ProductRepository, OrderRepository, UserRepository
+│   ├── Repositories/         # ProductRepository, OrderRepository, UserRepository, CategoryRepository
 │   ├── Services/             # JwtTokenService, BCryptPasswordHasher
 │   ├── DataSeeder.cs
 │   └── InfrastructureServiceExtensions.cs
 └── MiApp.WebApi/
-    ├── Controllers/      # AuthController, ProductsController, OrdersController
+│   ├── Controllers/      # AuthController, ProductsController, OrdersController, CategoriesController
     ├── Models/           # Request models
     └── Program.cs
 ```
@@ -119,6 +119,12 @@ Se insertan también **6 productos** distribuidos en 3 categorías: Electrónica
 | PUT | `/api/products/{id}` | Actualizar producto | Admin |
 | DELETE | `/api/products/{id}` | Eliminar producto | Admin |
 
+### Categories
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/categories` | Listar todas las categorías | No |
+
 ### Orders
 
 | Método | Ruta | Descripción | Auth |
@@ -132,8 +138,15 @@ Se insertan también **6 productos** distribuidos en 3 categorías: Electrónica
 ## Autenticación
 
 1. Hacer `POST /api/auth/login` con las credenciales.
-2. Copiar el `token` de la respuesta.
-3. En Swagger: click en **Authorize** → ingresar `Bearer <token>`.
+2. La respuesta incluye `userId` y `token`:
+```json
+{
+  "userId": "b1b2b3b4-0000-0000-0000-000000000001",
+  "token": "eyJhbG..."
+}
+```
+3. Copiar el `token` y en Swagger: click en **Authorize** → ingresar `Bearer <token>`.
+4. Usar el `userId` para crear órdenes en `POST /api/orders`.
 
 ---
 
