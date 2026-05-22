@@ -17,3 +17,4 @@ D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Infrastructure\obj\Debug\net8.0
 D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Infrastructure\obj\Debug\net8.0\MiApp.Infrastructure.pdb
 D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Infrastructure\obj\Debug\net8.0\MiApp.Infrastructure.genruntimeconfig.cache
 D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Infrastructure\obj\Debug\net8.0\ref\MiApp.Infrastructure.dll
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Infrastructure\obj\Debug\net8.0\MiApp.Infrastructure.sourcelink.json

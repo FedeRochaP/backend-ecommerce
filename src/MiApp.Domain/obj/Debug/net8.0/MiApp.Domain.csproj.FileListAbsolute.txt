@@ -9,3 +9,4 @@ D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Domain\obj\Debug\net8.0\MiApp.D
 D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Domain\obj\Debug\net8.0\refint\MiApp.Domain.dll
 D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Domain\obj\Debug\net8.0\MiApp.Domain.pdb
 D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Domain\obj\Debug\net8.0\ref\MiApp.Domain.dll
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.Domain\obj\Debug\net8.0\MiApp.Domain.sourcelink.json

@@ -143,3 +143,4 @@ D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.WebApi\obj\Debug\net8.0\refint\
 D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.WebApi\obj\Debug\net8.0\MiApp.WebApi.pdb
 D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.WebApi\obj\Debug\net8.0\MiApp.WebApi.genruntimeconfig.cache
 D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.WebApi\obj\Debug\net8.0\ref\MiApp.WebApi.dll
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.WebApi\obj\Debug\net8.0\MiApp.WebApi.sourcelink.json
