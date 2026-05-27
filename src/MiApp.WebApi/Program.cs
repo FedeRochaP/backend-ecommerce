@@ -1,6 +1,6 @@
 using System.Text;
+using MiApp.Application.Features.Auth.Commands;
 using MiApp.Application.Interfaces;
-using MiApp.Application.UseCases;
 using MiApp.Infrastructure;
 using MiApp.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -44,11 +44,8 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Use cases
-builder.Services.AddScoped<LoginUseCase>();
-builder.Services.AddScoped<RegisterUseCase>();
-builder.Services.AddScoped<GetAllProductsUseCase>();
-builder.Services.AddScoped<CreateOrderUseCase>();
+// MediatR — auto-descubre todos los IRequestHandler del ensamblado Application
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LoginCommandHandler).Assembly));
 
 // JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"]!;

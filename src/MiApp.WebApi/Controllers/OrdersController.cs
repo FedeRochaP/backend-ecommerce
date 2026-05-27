@@ -1,8 +1,7 @@
-using MiApp.Application.DTOs;
-using MiApp.Application.Interfaces;
-using MiApp.Application.UseCases;
+using MediatR;
+using MiApp.Application.Features.Orders.Commands;
+using MiApp.Application.Features.Orders.Queries;
 using MiApp.Domain.Exceptions;
-using MiApp.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,46 +12,31 @@ namespace MiApp.WebApi.Controllers;
 [Authorize]
 public class OrdersController : ControllerBase
 {
-    private readonly CreateOrderUseCase _createOrderUseCase;
-    private readonly IOrderRepository _orderRepository;
+    private readonly ISender _sender;
 
-    public OrdersController(CreateOrderUseCase createOrderUseCase, IOrderRepository orderRepository)
-    {
-        _createOrderUseCase = createOrderUseCase;
-        _orderRepository = orderRepository;
-    }
+    public OrdersController(ISender sender) => _sender = sender;
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
-        var order = await _orderRepository.GetByIdWithItemsAsync(id, ct);
-        if (order is null) return NotFound();
-        return Ok(order);
+        var result = await _sender.Send(new GetOrderByIdQuery(id), ct);
+        return result is null ? NotFound() : Ok(result);
     }
 
     [HttpGet("user/{userId:guid}")]
     public async Task<IActionResult> GetByUser(Guid userId, CancellationToken ct)
-    {
-        var orders = await _orderRepository.GetByUserIdAsync(userId, ct);
-        return Ok(orders);
-    }
+        => Ok(await _sender.Send(new GetOrdersByUserQuery(userId), ct));
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateOrderRequest request, CancellationToken ct)
+    public async Task<IActionResult> Create([FromBody] CreateOrderCommand command, CancellationToken ct)
     {
-        // Mapeo del modelo HTTP al command de Application
-        var command = new CreateOrderCommand(
-            request.UserId,
-            request.Items.Select(i => new OrderItemCommand(i.ProductId, i.Quantity)).ToList());
-
         try
         {
-            // COMMAND: pasa por el caso de uso
-            var order = await _createOrderUseCase.ExecuteAsync(command, ct);
-            if (order is null)
+            var result = await _sender.Send(command, ct);
+            if (result is null)
                 return NotFound(new { message = "Uno o más productos no fueron encontrados." });
 
-            return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
         catch (DomainException ex)
         {

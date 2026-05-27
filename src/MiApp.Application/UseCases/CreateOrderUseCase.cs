@@ -19,7 +19,7 @@ public class CreateOrderUseCase
         _productRepository = productRepository;
     }
 
-    public async Task<Order?> ExecuteAsync(CreateOrderCommand command, CancellationToken ct = default)
+    public async Task<Order?> ExecuteAsync(CreateOrderDto command, CancellationToken ct = default)
     {
         var order = new Order(Guid.NewGuid(), command.UserId);
 

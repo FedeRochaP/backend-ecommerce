@@ -1,4 +1,5 @@
-using MiApp.Application.Interfaces;
+using MediatR;
+using MiApp.Application.Features.Categories.Queries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MiApp.WebApi.Controllers;
@@ -7,17 +8,14 @@ namespace MiApp.WebApi.Controllers;
 [Route("api/[controller]")]
 public class CategoriesController : ControllerBase
 {
-    private readonly ICategoryRepository _categoryRepository;
+    private readonly ISender _sender;
 
-    public CategoriesController(ICategoryRepository categoryRepository)
-    {
-        _categoryRepository = categoryRepository;
-    }
+    public CategoriesController(ISender sender) => _sender = sender;
 
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {
-        var categories = await _categoryRepository.GetAllAsync(ct);
-        return Ok(categories);
+        var result = await _sender.Send(new GetAllCategoriesQuery(), ct);
+        return Ok(result);
     }
 }

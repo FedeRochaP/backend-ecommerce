@@ -1,6 +1,6 @@
 # MiApp — E-Commerce Backend API
 
-API REST desarrollada en **ASP.NET Core (.NET 8)** siguiendo **Clean Architecture**.  
+API REST desarrollada en **ASP.NET Core (.NET 8)** siguiendo **Clean Architecture** con patrón **CQRS**.  
 Implementa autenticación con JWT, encriptación de contraseñas con BCrypt y persistencia con Entity Framework Core + SQLite.
 
 ---
@@ -13,22 +13,45 @@ Implementa autenticación con JWT, encriptación de contraseñas con BCrypt y pe
 | ASP.NET Core | 8.0 |
 | Entity Framework Core | 8.0 |
 | SQLite | — |
+| MediatR | 12.4.1 |
 | BCrypt.Net-Next | 4.0.3 |
 | JWT Bearer | 8.0 |
 | Swashbuckle (Swagger) | 6.9 |
+| xUnit | 2.9 |
+| Moq | 4.20 |
 
 ---
 
 ## Arquitectura
 
-El proyecto sigue **Clean Architecture** dividido en 4 capas:
+El proyecto sigue **Clean Architecture** con patrón **CQRS** (Command Query Responsibility Segregation), dividido en 4 capas:
 
 ```
 MiApp.Domain          → Entidades, Value Objects, Excepciones, Interfaces base
-MiApp.Application     → Casos de uso, DTOs, Interfaces de repositorios
+MiApp.Application     → CQRS (Commands, Queries, Handlers), DTOs, Interfaces de repositorios
 MiApp.Infrastructure  → EF Core, Repositorios, JWT, BCrypt, Seed de datos
 MiApp.WebApi          → Controllers, configuración, Swagger
 ```
+
+### Flujo CQRS con MediatR
+
+```
+HTTP Request
+    ↓
+Controller
+    ↓  ISender.Send(command/query)
+MediatR (dispatcher)
+    ↓  resuelve IRequestHandler<TRequest, TResponse>
+Handler (Application/Features)
+    ↓  usa interfaces de repositorio
+Repository (Infrastructure)
+    ↓
+Base de datos (SQLite)
+```
+
+Los controllers **nunca** acceden directamente a repositorios ni a entidades de dominio.  
+Toda la lógica de negocio vive en los handlers.  
+MediatR actúa como mediador, desacoplando controllers de handlers mediante `ISender`.
 
 ### Estructura de carpetas
 
@@ -41,9 +64,19 @@ src/
 │   ├── Interfaces/       # IRepository<T> (base genérica)
 │   └── ValueObjects/     # Money
 ├── MiApp.Application/
-│   ├── DTOs/             # LoginRequest, LoginResponse, RegisterRequest, CreateOrderCommand
+│   ├── Common/           # IQuery<T>, ICommand<T> (extienden IRequest<T> de MediatR)
+│   ├── DTOs/             # LoginResponse (+ DTOs legados)
+│   ├── Features/
+│   │   ├── Auth/Commands/      # LoginCommand, RegisterCommand (+ handlers)
+│   │   ├── Products/
+│   │   │   ├── Commands/       # CreateProductCommand, UpdateProductCommand, DeleteProductCommand
+│   │   │   └── Queries/        # GetAllProductsQuery, GetProductByIdQuery, SearchProductsQuery
+│   │   ├── Categories/Queries/ # GetAllCategoriesQuery
+│   │   └── Orders/
+│   │       ├── Commands/       # CreateOrderCommand (+ handler)
+│   │       └── Queries/        # GetOrderByIdQuery, GetOrdersByUserQuery
 │   ├── Interfaces/       # IProductRepository, IOrderRepository, IUserRepository, ICategoryRepository, ITokenService, IPasswordHasher
-│   └── UseCases/         # LoginUseCase, RegisterUseCase, GetAllProductsUseCase, CreateOrderUseCase
+│   └── Responses/        # ProductResponse, CategoryResponse, OrderResponse, OrderItemResponse
 ├── MiApp.Infrastructure/
 │   ├── Migrations/
 │   ├── Persistence/
@@ -54,9 +87,12 @@ src/
 │   ├── DataSeeder.cs
 │   └── InfrastructureServiceExtensions.cs
 └── MiApp.WebApi/
-│   ├── Controllers/      # AuthController, ProductsController, OrdersController, CategoriesController
-    ├── Models/           # Request models
+    ├── Controllers/      # AuthController, ProductsController, OrdersController, CategoriesController
     └── Program.cs
+tests/
+└── MiApp.Tests/
+    ├── Products/         # GetAllProductsQueryHandlerTests, GetProductByIdQueryHandlerTests, CreateProductCommandHandlerTests
+    └── Orders/           # CreateOrderCommandHandlerTests
 ```
 
 ---
@@ -147,6 +183,38 @@ Se insertan también **6 productos** distribuidos en 3 categorías: Electrónica
 ```
 3. Copiar el `token` y en Swagger: click en **Authorize** → ingresar `Bearer <token>`.
 4. Usar el `userId` para crear órdenes en `POST /api/orders`.
+
+### Ejemplo de creación de orden
+
+```json
+POST /api/orders
+{
+  "userId": "b1b2b3b4-0000-0000-0000-000000000001",
+  "items": [
+    { "productId": "aaaaaaaa-0000-0000-0000-000000000001", "quantity": 2 },
+    { "productId": "aaaaaaaa-0000-0000-0000-000000000002", "quantity": 1 }
+  ]
+}
+```
+
+---
+
+## Tests
+
+El proyecto incluye tests unitarios con **xUnit + Moq** que cubren los handlers de CQRS:
+
+```bash
+dotnet test tests/MiApp.Tests/MiApp.Tests.csproj
+```
+
+| Archivo | Tests |
+|---|---|
+| `GetAllProductsQueryHandlerTests` | Retorna todos, lista vacía, mapeo correcto |
+| `GetProductByIdQueryHandlerTests` | Encontrado, no encontrado, Id correcto al repo |
+| `CreateProductCommandHandlerTests` | Datos correctos, llama AddAsync, validaciones |
+| `CreateOrderCommandHandlerTests` | Orden con total, producto no encontrado, stock insuficiente |
+
+Los repositorios se mockean con **Moq** — los tests no dependen de base de datos.
 
 ---
 

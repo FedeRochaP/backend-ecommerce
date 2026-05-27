@@ -1,7 +1,6 @@
-using MiApp.Application.Interfaces;
-using MiApp.Application.UseCases;
-using MiApp.Domain.Entities;
-using MiApp.WebApi.Models;
+using MediatR;
+using MiApp.Application.Features.Products.Commands;
+using MiApp.Application.Features.Products.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,54 +10,33 @@ namespace MiApp.WebApi.Controllers;
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
-    private readonly GetAllProductsUseCase _getAllProductsUseCase;
-    private readonly IProductRepository _productRepository;
+    private readonly ISender _sender;
 
-    public ProductsController(GetAllProductsUseCase getAllProductsUseCase, IProductRepository productRepository)
-    {
-        _getAllProductsUseCase = getAllProductsUseCase;
-        _productRepository = productRepository;
-    }
+    public ProductsController(ISender sender) => _sender = sender;
 
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken ct)
-    {
-        // QUERY: pasa por el caso de uso
-        var products = await _getAllProductsUseCase.ExecuteAsync(ct);
-        return Ok(products);
-    }
+        => Ok(await _sender.Send(new GetAllProductsQuery(), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
-        var product = await _productRepository.GetByIdAsync(id, ct);
-        if (product is null) return NotFound();
-        return Ok(product);
+        var result = await _sender.Send(new GetProductByIdQuery(id), ct);
+        return result is null ? NotFound() : Ok(result);
     }
 
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string name, CancellationToken ct)
-    {
-        var products = await _productRepository.SearchByNameAsync(name, ct);
-        return Ok(products);
-    }
+        => Ok(await _sender.Send(new SearchProductsQuery(name), ct));
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Create([FromBody] CreateProductRequest request, CancellationToken ct)
+    public async Task<IActionResult> Create([FromBody] CreateProductCommand command, CancellationToken ct)
     {
         try
         {
-            var product = new Product(
-                Guid.NewGuid(),
-                request.Name,
-                request.Description,
-                request.Price,
-                request.Stock,
-                request.CategoryId);
-
-            await _productRepository.AddAsync(product, ct);
-            return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+            var result = await _sender.Send(command, ct);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
         catch (ArgumentException ex)
         {
@@ -68,16 +46,12 @@ public class ProductsController : ControllerBase
 
     [HttpPut("{id:guid}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductRequest request, CancellationToken ct)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductCommand command, CancellationToken ct)
     {
-        var product = await _productRepository.GetByIdAsync(id, ct);
-        if (product is null) return NotFound(new { message = "Producto no encontrado." });
-
         try
         {
-            product.Update(request.Name, request.Description, request.Price, request.Stock);
-            await _productRepository.UpdateAsync(product, ct);
-            return NoContent();
+            var found = await _sender.Send(command with { Id = id }, ct);
+            return found ? NoContent() : NotFound(new { message = "Producto no encontrado." });
         }
         catch (ArgumentException ex)
         {
@@ -89,10 +63,7 @@ public class ProductsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
-        var product = await _productRepository.GetByIdAsync(id, ct);
-        if (product is null) return NotFound();
-
-        await _productRepository.DeleteAsync(product, ct);
-        return NoContent();
+        var found = await _sender.Send(new DeleteProductCommand(id), ct);
+        return found ? NoContent() : NotFound();
     }
 }
