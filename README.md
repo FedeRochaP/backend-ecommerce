@@ -14,6 +14,7 @@ Implementa autenticación con JWT, encriptación de contraseñas con BCrypt y pe
 | Entity Framework Core | 8.0 |
 | SQLite | — |
 | MediatR | 12.4.1 |
+| FluentValidation | 11.11.0 |
 | BCrypt.Net-Next | 4.0.3 |
 | JWT Bearer | 8.0 |
 | Swashbuckle (Swagger) | 6.9 |
@@ -41,6 +42,7 @@ HTTP Request
 Controller
     ↓  ISender.Send(command/query)
 MediatR (dispatcher)
+    ↓  ValidationBehavior (FluentValidation) → lanza ValidationException si hay errores
     ↓  resuelve IRequestHandler<TRequest, TResponse>
 Handler (Application/Features)
     ↓  usa interfaces de repositorio
@@ -52,6 +54,28 @@ Base de datos (SQLite)
 Los controllers **nunca** acceden directamente a repositorios ni a entidades de dominio.  
 Toda la lógica de negocio vive en los handlers.  
 MediatR actúa como mediador, desacoplando controllers de handlers mediante `ISender`.
+
+### Pipeline de validación (FluentValidation)
+
+Antes de que cada `Command` llegue a su handler, el `ValidationBehavior<TRequest, TResponse>` ejecuta los validators registrados para ese tipo. Si alguna regla falla, se lanza `FluentValidation.ValidationException` que el `GlobalExceptionHandler` convierte en una respuesta HTTP 400 con los errores por campo:
+
+```json
+{
+  "title": "Error de validación.",
+  "status": 400,
+  "errors": {
+    "Email": ["El email no tiene un formato válido."],
+    "Password": ["La contraseña debe tener al menos 6 caracteres."]
+  }
+}
+```
+
+Validators implementados:
+- `LoginCommandValidator` — email válido, contraseña no vacía
+- `RegisterCommandValidator` — email válido, nombre ≤100 chars, contraseña ≥6 chars
+- `CreateProductCommandValidator` — nombre, descripción, precio > 0, stock ≥ 0, categoría requerida
+- `UpdateProductCommandValidator` — ídem sin categoría
+- `CreateOrderCommandValidator` — userId, items no vacíos, productId y cantidad > 0 por item
 
 ### Estructura de carpetas
 
@@ -88,6 +112,7 @@ src/
 │   └── InfrastructureServiceExtensions.cs
 └── MiApp.WebApi/
     ├── Controllers/      # AuthController, ProductsController, OrdersController, CategoriesController
+    ├── Middleware/       # GlobalExceptionHandler (IExceptionHandler)
     └── Program.cs
 tests/
 └── MiApp.Tests/

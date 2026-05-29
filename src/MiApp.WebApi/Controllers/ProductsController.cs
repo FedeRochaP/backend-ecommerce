@@ -33,30 +33,16 @@ public class ProductsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateProductCommand command, CancellationToken ct)
     {
-        try
-        {
-            var result = await _sender.Send(command, ct);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var result = await _sender.Send(command, ct);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpPut("{id:guid}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductCommand command, CancellationToken ct)
     {
-        try
-        {
-            var found = await _sender.Send(command with { Id = id }, ct);
-            return found ? NoContent() : NotFound(new { message = "Producto no encontrado." });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var found = await _sender.Send(command with { Id = id }, ct);
+        return found ? NoContent() : NotFound(new { message = "Producto no encontrado." });
     }
 
     [HttpDelete("{id:guid}")]

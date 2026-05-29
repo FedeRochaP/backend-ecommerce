@@ -1,7 +1,6 @@
 using MediatR;
 using MiApp.Application.Features.Orders.Commands;
 using MiApp.Application.Features.Orders.Queries;
-using MiApp.Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,21 +29,10 @@ public class OrdersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateOrderCommand command, CancellationToken ct)
     {
-        try
-        {
-            var result = await _sender.Send(command, ct);
-            if (result is null)
-                return NotFound(new { message = "Uno o más productos no fueron encontrados." });
+        var result = await _sender.Send(command, ct);
+        if (result is null)
+            return NotFound(new { message = "Uno o más productos no fueron encontrados." });
 
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-        }
-        catch (DomainException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 }

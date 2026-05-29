@@ -146,3 +146,5 @@ D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.WebApi\obj\Debug\net8.0\ref\MiA
 D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.WebApi\obj\Debug\net8.0\MiApp.WebApi.sourcelink.json
 D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.WebApi\bin\Debug\net8.0\MediatR.dll
 D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.WebApi\bin\Debug\net8.0\MediatR.Contracts.dll
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.WebApi\bin\Debug\net8.0\FluentValidation.dll
+D:\Fede\Estudio\Facultad\Backend\MiApp\src\MiApp.WebApi\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
